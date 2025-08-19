@@ -1,26 +1,15 @@
 # UVP_seminarska
 Movie recommendation programme
 
-## Funkcionalnosti
-- Naloži dodatne filme iz baze.
-- Nastavitev filtrov:  
-  - Izbira specifičnih žanrov, ki jih želite videti.  
-  - Izključitev določenih žanrov.  
-  - Omejitev po datumu izdaje, minimalni oceni in minimalnem številu glasov.
-- Priporočila glede na opis besedila, s primerjavo s sinopsisi filmov.
-- Prikaz priporočil v pregledni tabeli:
-  - Stolpci: **Naslov, Datum izdaje, Ocena, Žanri, Sinopsis**
-  - Najboljši film označen z barvo.
-- Grafični prikaz podobnosti z opisom in ocene filma.
-
 ## Navodila za uporabo
-1. Odpri projekt v Python okolju ali Jupyter Notebook.
-2. Zaženi program.
-3. Vnesi število dodatnih filmov, ki jih želiš naložiti.
-4. Odloči se, ali želiš prilagoditi filtre.
-5. Vnesi dodatne zahteve glede žanrov, datuma, ocene in števila glasov.
-6. Vnesi opis, ki bo uporabljen za priporočila.
-7. Preglej tabelo priporočil in graf.
+1. Odprite projekt v Python okolju ali Jupyter Notebook.
+2. Lahko uporabite moj file podatkov movies.json v njem je približno 4000 filmov.
+3. Zaženite program.
+4. Vnesite število dodatnih filmov, ki jih želiš naložiti. Svetujem da naložite manj kot 1000 na enkrat.
+5. Odločite se, ali želiš prilagoditi filtre.
+6. Če uporabite moj movies.json vedite da je že shranjen specificiran filter.
+7. Vnesite dodatne zahteve glede žanrov, datuma, ocene in števila glasov.
+8. Vnesite opis, ki bo uporabljen za priporočila.
 
 
 ## Zahtevani moduli
