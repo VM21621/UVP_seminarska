@@ -1,9 +1,11 @@
 import requests
 import json
+from datetime import datetime
+import pandas as pd
+import matplotlib.pyplot as plt
 
 API_KEY = "797dacab93a96c4a7e0ab91052873c8c"
 BASE_URL = "https://api.themoviedb.org/3"
-
 JSONFILE = "movies.json"
 
 def load():
@@ -18,20 +20,11 @@ def load():
         return {"last_page": 0, "movies": {}}
 
 
-def genref():
-    url = f"{BASE_URL}/genre/movie/list"
-    params = {"api_key": API_KEY, "language": "en-US"}
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
-        return {}
-    return {g["id"]: g["name"] for g in response.json().get("genres", [])}
-
 
 def savepages(data):
     with open(JSONFILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-genreidstuff=genref()
 def main_fetch(loadpages=5):
     data = load()
     last_page = data["last_page"]
@@ -44,11 +37,20 @@ def main_fetch(loadpages=5):
         if response.status_code != 200:
             print(f"Error fetching page {page}")
             continue
+
+        url2 = f"{BASE_URL}/genre/movie/list"
+        params2 = {"api_key": API_KEY, "language": "en-US"}
+        response2 = requests.get(url2, params=params2)
+        if response2.status_code != 200:
+            genremap={}
+        else: 
+            genremap={genre["id"]: genre["name"] for genre in response.json().get("genres", [])}
         movies = response.json().get("results", [])
+        
         for movie in movies:
             title = movie.get("title")
             genre_ids = movie.get("genre_ids", [])
-            genres = [genreidstuff.get(gid, "Unknown") for gid in genre_ids]
+            genres = [genremap.get(gid, "Unknown") for gid in genre_ids]
 
             moviesseznam[title] = {
                     "genres": genres,
@@ -63,7 +65,6 @@ def main_fetch(loadpages=5):
         savepages(data)
     return moviesseznam
 
-from datetime import datetime
 def datefilter(date, mini, maxi):
     try:
         movie_date = datetime.strptime(date, "%Y-%m-%d")
@@ -91,13 +92,14 @@ def checkforfilter(filterlist, data):#filterlist = [genrelist,genrenonlist,timer
     return    datefilter(date,filterlist[2][0],filterlist[2][1])
        
        #just if the user inputs a non existant genre
-def existantgenres(seznam):
-    listmain=[]
-    for movie in seznam:
-        for genre in seznam[movie]["genres"]:
-            if genre not in listmain:
-                listmain.append(genre) 
-    return listmain
+
+def existantgenres():#just if the user inputs a non existant genre
+    url2 = f"{BASE_URL}/genre/movie/list"
+    params = {"api_key": API_KEY, "language": "en-US"}
+    response = requests.get(url2, params=params)
+    if response.status_code != 200:
+        return None
+    return [genre["name"] for genre in response.json().get("genres", [])]
 
 def filter(filterlist,seznam):
     seznammain={}
@@ -106,7 +108,6 @@ def filter(filterlist,seznam):
         if checkforfilter(filterlist,data):
             seznammain[movie]=seznam[movie]
     return seznammain
-import pandas as pd
 
 def findrecommendation(movieseznam,description):
     description=description.lower().split()
@@ -133,34 +134,29 @@ def findrecommendation(movieseznam,description):
     df = df.sort_values(by=["points", "rating"], ascending=[False, False])
     return  df
 
-
-import matplotlib.pyplot as plt
-
 def main():      
-    a=int(input("How many more movies should we load?"))
-    if a!=0:
-        a=a//20+1 #a should load pages..
+    a=int(input("How many pages should we load?(1page=20movies)"))
     movieseznam=main_fetch(a)
-    print(f"Scanning {len(movieseznam)} movies in total")
-    genrelist=existantgenres(movieseznam)
+    print(f"Collected {len(movieseznam)} movies in total")
+    genrelist=existantgenres()
     if input("customize your filters?:(input yes or no)")=="yes":
         genreneeded=[]
         genrenon=[]
-
         while True:
-            inp=(input("Do you want any more specific genres(when you are done input 'No'): "))
+            inp=input("Do you want any more specific genres(when you are done input 'No'): ")
             if inp=="No":
                 break
             if inp not in genrelist:
-                print("genre doesnt exist make sure to use an uppercaseletter exemple: Horror")
+                print("genre doesnt exist exemple: Action ")
+                
             else:
                 genreneeded.append(inp)
         while True:
-            inp=(input("Do you want to remove all of a certain genre(when you are done input 'No'): "))
+            inp=input("Do you want to remove all of a certain genre(when you are done input 'No'): ")
             if inp=="No":
                 break
             if inp not in genrelist:
-                print("genre doesnt exist make sure to use an uppercaseletter exemple: Romance")
+                print("genre doesnt exist exemple: Horror ")
             elif inp in genreneeded:
                 print("You want to see a movie with and without "+str(inp)+"? i dont think that makes sense..")
             else:
@@ -195,7 +191,17 @@ def main():
 
     df = findrecommendation(mainseznam, description)
     topgraph =df.head(10)
- 
+    topoptions = df.head(10)[["title", "release_date", "rating", "genres", "synopsis"]]
+    topoptions["genres"] = [", ".join(genres) for genres in topoptions["genres"]]
+    for _, movie in topoptions.iterrows():
+        print("-" * 80)
+        print(f"Title       : {movie['title']}")
+        print(f"Release Date: {movie['release_date']}")
+        print(f"Rating      : {movie['rating']}")
+        print(f"Genres      : {movie['genres']}")
+        print(f"Synopsis    : {movie['synopsis']}\n")
+        
+
     plt.figure(figsize=(9, 5))
     plt.bar(topgraph["title"], topgraph["points"], label="Similarity to description",alpha=0.6)
     plt.plot(topgraph["title"], topgraph["rating"], color="red", marker="o", label="Rating")
@@ -212,3 +218,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
