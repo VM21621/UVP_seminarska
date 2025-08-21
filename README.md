@@ -15,6 +15,6 @@ Movie recommendation programme
 ## Zahtevani moduli
 - `pandas`
 - `matplotlib`
-- `json`
+- `requests`
 
 
