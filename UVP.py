@@ -44,7 +44,7 @@ def main_fetch(loadpages=5):
         if response2.status_code != 200:
             genremap={}
         else: 
-            genremap={genre["id"]: genre["name"] for genre in response.json().get("genres", [])}
+            genremap={genre["id"]: genre["name"] for genre in response2.json().get("genres", [])}
         movies = response.json().get("results", [])
         
         for movie in movies:
